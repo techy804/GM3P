@@ -1,12 +1,12 @@
 # NOTICE
 GM3P has been canceled. Its development will no longer continue.<br />
-Usage of the program is, of course, still possible. However, we recommend different tools in order to create the best possible experience for you.
+Usage of the program is, of course, still possible. However, I recommend using [G3MTool](https://github.com/y114git/G3MTool) instead.
 
 # GameMaker Mass Mod Patcher (GM3P)
 
 **G**ame**M**aker **M**ass **M**od **P**atcher (abbreviated to **GM3P**) is a tool used to merge multiple xdelta mods for GameMaker games and thus be able to play multiple mods at once.<br />
 
-_This tool was used in the backend of [Deltamod](https://gamebanana.com/tools/20575) for mod merging. However, it has been replaced._
+_This tool was used in the backend of [Deltamod](https://gamebanana.com/tools/20575) for mod merging._
 
 ## How to build
 1. Make sure you have .NET 8.0 or later and Git installed<br />
@@ -26,7 +26,7 @@ By default, GM3P will launch the "Console" app, which is an on-rails way to go t
 
 ### CLI
 
-The CLI version was made for advanced users who want more control over the process and for toolmakers who want to use GM3P in their own tools. There are 6 commands in the CLI version:
+The CLI version was made for advanced users who want more control over the process and for toolmakers who want to use GM3P in their own tools. There are 7 commands in the CLI version:
 
 `config` - Changes settings and saves them in a JSON format Example: `GM3P.exe config update c.enablefastcombiner false save ./config.json`
 
