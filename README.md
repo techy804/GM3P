@@ -6,7 +6,7 @@ Usage of the program is, of course, still possible. However, we recommend differ
 
 **G**ame**M**aker **M**ass **M**od **P**atcher (abbreviated to **GM3P**) is a tool used to merge multiple xdelta mods for GameMaker games and thus be able to play multiple mods at once.<br />
 
-_This tool is currently used in the backend of [Deltamod](https://gamebanana.com/tools/20575) for mod merging._
+_This tool was used in the backend of [Deltamod](https://gamebanana.com/tools/20575) for mod merging. However, it has been replaced._
 
 ## How to build
 1. Make sure you have .NET 8.0 or later and Git installed<br />
