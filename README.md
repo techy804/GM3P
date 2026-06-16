@@ -1,3 +1,7 @@
+# NOTICE
+GM3P has been canceled. Its development will no longer continue.<br />
+Usage of the program is, of course, still possible. However, we recommend different tools in order to create the best possible experience for you.
+
 # GameMaker Mass Mod Patcher (GM3P)
 
 **G**ame**M**aker **M**ass **M**od **P**atcher (abbreviated to **GM3P**) is a tool used to merge multiple xdelta mods for GameMaker games and thus be able to play multiple mods at once.<br />
