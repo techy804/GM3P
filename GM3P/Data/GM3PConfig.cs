@@ -6,12 +6,14 @@
         public string? OutputPath { get; set; }
         public string? DeltaPatcherPath { get; set; }
         public string? ModToolPath { get; set; }
+        public string? G3MToolPath { get; set; }
         public string? WorkingDirectory { get; set; }
         public string? GameEngine { get; set; }
         public int ModAmount { get; set; }
         public int ChapterAmount { get; set; } = 1;
         public bool Combined { get; set; }
         public bool EnableFastCombiner { get; set; } = true;
+        public int CombinerTool { get; set; } = 0;
 
         // Cache settings
         public bool CacheEnabled { get; set; } = true;

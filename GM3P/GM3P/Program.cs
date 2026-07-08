@@ -16,13 +16,13 @@ namespace GM3P
 {
     class Program
     {
-        private const double Version = 0.6;
+        private const double Version = 1.0;
         private static IGM3POrchestrator? _orchestrator;
         private static IConfigurationService? _config;
 
         static async Task Main(string[] args)
         {
-            Console.WriteLine($"GM3P v{Version}.1");
+            Console.WriteLine($"GM3P v{Version}.0-beta1");
 
             // Setup services manually (no DI container)
             SetupServices();
@@ -93,6 +93,40 @@ namespace GM3P
 
         static async Task RunCommand(string[] args)
         {
+            var opArgParse = 0;
+            string[] opArgs = { };
+            string[] reqArgs = { };
+            string[] singleOptions = { "-version", "-help", "v" };
+            int opArgCount = 0;
+            int reqArgCount = 0;
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i].StartsWith("-"))
+                {
+                    Array.Resize(ref opArgs, opArgCount + 1);
+                    opArgs[opArgCount] = args[i];
+                    foreach (string singleOption in singleOptions) {
+                        if (args[i].EndsWith(singleOption)) { 
+                            opArgParse++;
+                        }
+                    }
+                    opArgCount++;
+                }
+                if (!args[i].StartsWith("-"))
+                {
+                    if (opArgParse == 0)
+                    {
+                        Array.Resize(ref reqArgs, reqArgCount + 1);
+                        reqArgs[reqArgCount] = args[i];
+                        reqArgCount++;
+                    }
+                    else
+                    {
+                        opArgs[opArgCount] += " " + args[i];
+                        opArgParse--;
+                    }
+                }
+            }
             var command = args[0].ToLower();
 
             switch (command)

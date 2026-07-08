@@ -82,7 +82,9 @@ namespace GM3P.Patching
                     case ".vcdiff":
                         await ApplyXDeltaPatch(dataPath, patchFile, config);
                         break;
-
+                    case ".g3mpatch":
+                        await ApplyG3MPatch(dataPath, patchFile, config);
+                        break;
                     default:
                         Console.WriteLine($"Unknown patch format: {extension}");
                         break;
@@ -133,7 +135,38 @@ namespace GM3P.Patching
                 File.Move(tmpPath, dataPath);
             }
         }
-
+        private async Task ApplyG3MPatch(string dataPath, string patchPath, GM3PConfig config)
+        {
+            string tmpPath = Path.ChangeExtension(dataPath, ".tmp.win");
+            using (var process = new Process())
+            {
+                if (OperatingSystem.IsWindows())
+                {
+                    process.StartInfo.FileName = config.G3MToolPath;
+                    process.StartInfo.Arguments =
+                        $"load \"{dataPath}\" --verbose --output \"{tmpPath}\" --g3mpatch \"{patchPath}\"";
+                }
+                else if (OperatingSystem.IsLinux())
+                {
+                    process.StartInfo.FileName = "/bin/bash";
+                    process.StartInfo.Arguments =
+                        $"-c \"{config.G3MToolPath} patch apply '{dataPath}' '{tmpPath}' '{patchPath}' --xdelta-fallback\"";
+                }
+                process.StartInfo.CreateNoWindow = false;
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.Start();
+                string output = await process.StandardOutput.ReadToEndAsync();
+                Console.WriteLine(output);
+                await process.WaitForExitAsync();
+            }
+            // Atomically replace after the tool is done
+            if (File.Exists(tmpPath))
+            {
+                try { File.Delete(dataPath); } catch { }
+                File.Move(tmpPath, dataPath);
+            }
+        }
         private async Task ApplyXDeltaPatch(string dataPath, string patchPath, GM3PConfig config)
         {
             string tmpPath = Path.ChangeExtension(dataPath, ".tmp.win");

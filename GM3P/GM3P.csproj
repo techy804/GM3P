@@ -2,10 +2,10 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>0.6.1.2</Version>
+        <Version>1.0.0.2</Version>
         <ApplicationIcon>Logo\GM3P logo 1x1 256.ico</ApplicationIcon>
     </PropertyGroup>
 
@@ -15,6 +15,10 @@
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0-preview.7.25380.108" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0-preview.7.25380.108" />
       <PackageReference Include="System.Diagnostics.EventLog" Version="10.0.0-preview.7.25380.108" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Menu\" />
     </ItemGroup>
 
 </Project>
