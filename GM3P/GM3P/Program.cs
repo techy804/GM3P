@@ -36,7 +36,7 @@ namespace GM3P
                 {
                     if (args == null || args.Length == 0)
                     {
-                        await RunConsoleApp();
+                        await RunAppVersion();
                     }
                     else
                     {
@@ -344,9 +344,33 @@ namespace GM3P
             _orchestrator!.Clear(target);
         }
 
-        static async Task RunConsoleApp()
+        static async Task RunAppVersion()
         {
             Console.WriteLine("Read the README for Operating Instructions\n");
+
+            Console.WriteLine("If you want to use the console version, enter \"console\" or leave blank. If you want to enter the menu, enter \"menu\". Otherwise enter in a command");
+            var iknowwhatwearegonnadotodayferb = Console.ReadLine()?.Replace("\"", "");
+            if (iknowwhatwearegonnadotodayferb == "menu")
+            {
+                Console.WriteLine("Menu is not implemented yet, please use the console version");
+                await RunConsoleApp();
+                return;
+            }
+            else if (iknowwhatwearegonnadotodayferb != "console" && !string.IsNullOrWhiteSpace(iknowwhatwearegonnadotodayferb))
+            {
+                var args = iknowwhatwearegonnadotodayferb.Split(' ');
+                await RunCommand(args);
+                await RunAppVersion();
+            }
+            else
+            {
+                await RunConsoleApp();
+                return;
+            }
+        }
+
+        static async Task RunConsoleApp()
+        {
 
             // Original message
             Console.WriteLine("Insert the path to the vanilla data.win, or type \"skip\" if want skip to compare and combine:");
