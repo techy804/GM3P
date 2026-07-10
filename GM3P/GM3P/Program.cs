@@ -22,7 +22,7 @@ namespace GM3P
 
         static async Task Main(string[] args)
         {
-            Console.WriteLine($"GM3P v{Version}.1");
+            Console.WriteLine($"GM3P v{Version}.2");
 
             // Setup services manually (no DI container)
             SetupServices();
