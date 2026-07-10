@@ -116,7 +116,7 @@ namespace GM3P
                     if (args.Length > 1)
                     {
                         var loadPath = args.Length > 1 ? args[1] : null;
-                        _config.LoadConfiguration(loadPath);
+                        _config?.LoadConfiguration(loadPath);
                         Console.WriteLine($"Configuration loaded from {(loadPath ?? "default path")}");
                     }
                     await RunConsoleApp();
@@ -155,7 +155,7 @@ namespace GM3P
 
                     if (File.Exists(savePath))
                     {
-                        _config.LoadConfiguration(savePath);
+                        _config?.LoadConfiguration(savePath);
                         Console.WriteLine($"Configuration loaded from {savePath}");
                     }
                     var setting = args[2];
@@ -163,43 +163,43 @@ namespace GM3P
                     switch (setting)
                     {
                         case "c.vanillapath":
-                            _config.UpdateConfiguration(c => c.VanillaPath = value);
+                            _config?.UpdateConfiguration(c => c.VanillaPath = value);
                             break;
                         case "c.outputpath":
-                            _config.UpdateConfiguration(c => c.OutputPath = value);
+                            _config?.UpdateConfiguration(c => c.OutputPath = value);
                             break;
                         case "c.deltapatcherpath":
-                            _config.UpdateConfiguration(c => c.DeltaPatcherPath = value);
+                            _config?.UpdateConfiguration(c => c.DeltaPatcherPath = value);
                             break;
                         case "c.modtoolpath":
-                            _config.UpdateConfiguration(c => c.ModToolPath = value);
+                            _config?.UpdateConfiguration(c => c.ModToolPath = value);
                             break;
                         case "c.gameengine":
-                            _config.UpdateConfiguration(c => c.GameEngine = value);
+                            _config?.UpdateConfiguration(c => c.GameEngine = value);
                             break;
                         case "c.modamount":
-                            _config.UpdateConfiguration(c => c.ModAmount = int.Parse(value));
+                            _config?.UpdateConfiguration(c => c.ModAmount = int.Parse(value));
                             break;
                         case "c.chapteramount":
-                            _config.UpdateConfiguration(c => c.ChapterAmount = int.Parse(value));
+                            _config?.UpdateConfiguration(c => c.ChapterAmount = int.Parse(value));
                             break;
                         case "c.combined":
-                            _config.UpdateConfiguration(c => c.Combined = bool.Parse(value));
+                            _config?.UpdateConfiguration(c => c.Combined = bool.Parse(value));
                             break;
                         case "c.enablefastcombiner":
-                            _config.UpdateConfiguration(c => c.EnableFastCombiner = bool.Parse(value));
+                            _config?.UpdateConfiguration(c => c.EnableFastCombiner = bool.Parse(value));
                             break;
                         case "c.cacheenabled": 
-                            _config.UpdateConfiguration(c => c.CacheEnabled = bool.Parse(value));
+                            _config?.UpdateConfiguration(c => c.CacheEnabled = bool.Parse(value));
                             break;
                         case "c.cachespritesenabled": 
-                            _config.UpdateConfiguration(c => c.CacheSpritesEnabled = bool.Parse(value));
+                            _config?.UpdateConfiguration(c => c.CacheSpritesEnabled = bool.Parse(value));
                             break;
                         case "c.exportcachecapmb":
-                            _config.UpdateConfiguration(c => c.ExportCacheCapMB = int.Parse(value));
+                            _config?.UpdateConfiguration(c => c.ExportCacheCapMB = int.Parse(value));
                             break;
                         case "c.xdeltaconcurrency":
-                            _config.UpdateConfiguration(c => c.XDeltaConcurrency = int.Parse(value));
+                            _config?.UpdateConfiguration(c => c.XDeltaConcurrency = int.Parse(value));
                             break;
                         default:
                             Console.WriteLine($"Unknown setting: {setting}");
@@ -216,7 +216,7 @@ namespace GM3P
             if (args.Length > 4)
             {
 
-                _config.SaveConfiguration(savePath);
+                _config?.SaveConfiguration(savePath);
                 Console.WriteLine($"Configuration saved to {(savePath ?? "default path")}");
                 return;
             }
@@ -232,13 +232,16 @@ namespace GM3P
             var loadPath = args.Length > 5 ? args[5] : null;
             _config!.UpdateConfiguration(c =>
             {
+                if (args.Length > 5)
+                {
+                    _config.LoadConfiguration(loadPath);
+                    Console.WriteLine($"Configuration loaded from {(loadPath ?? "default path")}");
+                }
                 c.VanillaPath = args[1].Replace("\"", "");
                 c.GameEngine = args[2];
                 c.ModAmount = int.Parse(args[3]);
 
-                if (args.Length > 5)
-                    _config.LoadConfiguration(loadPath);
-                    Console.WriteLine($"Configuration loaded from {(loadPath ?? "default path")}");
+                
             });
 
             var patchPaths = args[4].Split("::").ToArray();
@@ -256,11 +259,14 @@ namespace GM3P
             var loadPath = args.Length > 4 ? args[4] : null;
             _config!.UpdateConfiguration(c =>
             {
-                c.ModAmount = int.Parse(args[1]);
-
                 if (args.Length > 4)
+                {
                     _config.LoadConfiguration(loadPath);
                     Console.WriteLine($"Configuration loaded from {(loadPath ?? "default path")}");
+                }
+                c.ModAmount = int.Parse(args[1]);
+
+                
             });
 
             bool shouldDump = args.Length <= 2 || args[2].ToLower() == "true";
@@ -290,14 +296,17 @@ namespace GM3P
             {
                 _config!.UpdateConfiguration(c =>
                 {
+                    if (args.Length > 4)
+                    {
+                        _config.LoadConfiguration(loadPath);
+                        Console.WriteLine($"Configuration loaded from {(loadPath ?? "default path")}");
+                    }
                     c.Combined = bool.Parse(args[2]);
 
                     if (args.Length > 3)
                         c.ModAmount = int.Parse(args[3]);
 
-                    if (args.Length > 4)
-                        _config.LoadConfiguration(loadPath);
-                        Console.WriteLine($"Configuration loaded from {(loadPath ?? "default path")}");
+                    
                 });
             }
 

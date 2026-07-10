@@ -342,7 +342,7 @@ namespace GM3P.Core
             }
 
             // 2. Import Rooms
-            if (HasCode(mergedObjects))
+            if (HasRooms(mergedObjects))
             {
                 Console.WriteLine("  Importing rooms...");
                 try

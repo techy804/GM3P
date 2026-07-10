@@ -82,6 +82,9 @@ namespace GM3P.Patching
                     case ".vcdiff":
                         await ApplyXDeltaPatch(dataPath, patchFile, config);
                         break;
+                    case ".g3mpatch":
+                        await ApplyG3MPatch(patchFile, config);
+                        break;
 
                     default:
                         Console.WriteLine($"Unknown patch format: {extension}");
@@ -94,6 +97,41 @@ namespace GM3P.Patching
             {
                 _concurrencySemaphore.Release();
             }
+        }
+
+        private async Task ApplyG3MPatch(string patchFile, GM3PConfig config)
+        {
+            var chapterFile = _directoryManager.GetCachePath(config, "chapterNumber.txt");
+            string chapter = File.ReadAllLines(chapterFile).FirstOrDefault();
+            var cacheFile = _directoryManager.GetCachePath(config, "modNumbersCache.txt");
+            string modNumber = File.ReadAllLines(cacheFile).FirstOrDefault();
+            string tempDir = _directoryManager.GetXDeltaCombinerPath(config,
+                    chapter.ToString(),
+                    modNumber.ToString(),
+                    "Objects");
+            Directory.CreateDirectory(tempDir);
+            try
+            {
+                // Extract the .g3mpatch file
+                System.IO.Compression.ZipFile.ExtractToDirectory(patchFile, tempDir);
+                // Copy the asset_order.txt to the output directory
+                string assetOrderPath = Path.Combine(tempDir, "Helpers", "asset_order.txt");
+                if (File.Exists(assetOrderPath))
+                {
+                    
+                    string outputDir = _directoryManager.GetXDeltaCombinerPath(config,
+                    chapter.ToString(),
+                    modNumber.ToString(),
+                    "Objects",
+                    "AssetOrder.txt");
+                    File.Copy(assetOrderPath, Path.Combine(outputDir, "asset_order.txt"), overwrite: true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to apply .g3mpatch: {ex.Message}");
+            }
+            
         }
 
         private async Task ApplyScriptPatch(string dataPath, string scriptPath, GM3PConfig config)
