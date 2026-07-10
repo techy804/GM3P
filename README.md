@@ -31,7 +31,7 @@ The CLI version was made for advanced users who want more control over the proce
 `config` - Changes settings and saves them in a JSON format Example: `GM3P.exe config update c.enablefastcombiner false save ./config.json`
 
 `massPatch` - The titular command. Makes multiple copies of the game, then patches each copy with a unique mod. The `compare` and `result` commands require this command to be called first. Otherwise, they will fail.
-Example: `GM3P.exe massPatch "./myGameMaker Game" GM 2 "./myMod1.xDelta","./MyMod2.csx"`
+Example: `GM3P.exe massPatch "./myGameMaker Game" GM 2 "./myMod1.xDelta,./MyMod2.csx"`
 
 `compare` - Compares and Combines modified objects
 Example: `GM3P.exe compare 2 true false`
