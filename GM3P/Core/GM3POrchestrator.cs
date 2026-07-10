@@ -829,6 +829,7 @@ namespace GM3P.Core
                     _directoryManager.GetXDeltaCombinerPath(_config.Config, chapter.ToString(), "0", "data.win"),
                     _directoryManager.GetXDeltaCombinerPath(_config.Config, chapter.ToString(), "1", "data.win"),
                     Path.Combine(resultPath, $"{modName}-Chapter{chapter}.xdelta"),
+                    Path.Combine(resultPath, $"{modName}-Chapter{chapter}.g3mpatch"),
                     _config.Config);
 
                 _fileLinker.LinkOrCopy(
@@ -854,6 +855,7 @@ namespace GM3P.Core
                 _directoryManager.GetXDeltaCombinerPath(_config.Config, chapter.ToString(), "0", "data.win"),
                 _directoryManager.GetXDeltaCombinerPath(_config.Config, chapter.ToString(), modNumber.ToString(), "data.win"),
                 Path.Combine(resultPath, chapter.ToString(), $"{modNumber}.xdelta"),
+                Path.Combine(resultPath, chapter.ToString(), $"{modNumber}.g3mpatch"),
                 _config.Config);
 
             _fileLinker.LinkOrCopy(

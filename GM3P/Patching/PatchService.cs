@@ -8,7 +8,7 @@ namespace GM3P.Patching
     {
         Task ApplyPatches(string[] patchPaths, GM3PConfig config);
         Task ApplyPatch(string sourceFile, string patchFile, string targetFile, GM3PConfig config);
-        Task CreatePatch(string originalFile, string modifiedFile, string patchFile, GM3PConfig config);
+        Task CreatePatch(string originalFile, string modifiedFile, string patchFile, string g3mpatch, GM3PConfig config);
     }
 
     public class PatchService : IPatchService
@@ -144,7 +144,7 @@ namespace GM3P.Patching
                 {
                     process.StartInfo.FileName = config.G3MToolPath;
                     process.StartInfo.Arguments =
-                        $"load \"{dataPath}\" --verbose --output \"{tmpPath}\" --g3mpatch \"{patchPath}\"";
+                        $"patch apply \"{dataPath}\" \"{tmpPath}\" \"{patchPath}\" --xdelta-fallback";
                 }
                 else if (OperatingSystem.IsLinux())
                 {
@@ -237,8 +237,9 @@ namespace GM3P.Patching
             }
         }
 
-        public async Task CreatePatch(string originalFile, string modifiedFile, string patchFile, GM3PConfig config)
+        public async Task CreatePatch(string originalFile, string modifiedFile, string patchFile, string g3mpatch, GM3PConfig config)
         {
+            // First xDelta3
             using (var process = new Process())
             {
                 if (OperatingSystem.IsWindows())
@@ -258,6 +259,29 @@ namespace GM3P.Patching
                 process.StartInfo.UseShellExecute = false;
                 process.Start();
 
+                await process.WaitForExitAsync();
+            }
+            // Then G3MTool
+            using (var process = new Process())
+            {
+                if (OperatingSystem.IsWindows())
+                {
+                    process.StartInfo.FileName = config.G3MToolPath;
+                    process.StartInfo.Arguments =
+                        $"patch create \"{originalFile}\" \"{modifiedFile}\" \"{g3mpatch}\" --xdelta-fallback";
+                }
+                else if (OperatingSystem.IsLinux())
+                {
+                    process.StartInfo.FileName = "/bin/bash";
+                    process.StartInfo.Arguments =
+                        $"-c \"{config.G3MToolPath} patch apply '{originalFile}' '{modifiedFile}' '{g3mpatch}' --xdelta-fallback\"";
+                }
+                process.StartInfo.CreateNoWindow = true;
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.Start();
+                string output = await process.StandardOutput.ReadToEndAsync();
+                Console.WriteLine(output);
                 await process.WaitForExitAsync();
             }
         }
