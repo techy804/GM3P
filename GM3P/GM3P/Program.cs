@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GM3P.Cache;
 using GM3P.Core;
@@ -292,7 +293,11 @@ namespace GM3P
                 
             });
 
-            var patchPaths = args[4].Split("::").ToArray();
+            var patchPaths = args[4].Replace("\"","").Split("::").ToArray();
+            for (int i = 0; i < patchPaths.Length; i++)
+            {
+                Console.WriteLine(patchPaths[i]);
+            }
             await _orchestrator!.ExecuteMassPatch(patchPaths);
         }
 
@@ -373,8 +378,8 @@ namespace GM3P
         {
             Console.WriteLine("Read the README for Operating Instructions\n");
 
-            Console.WriteLine("If you want to use the console version, enter \"console\" or leave blank. If you want to enter the menu, enter \"menu\". Otherwise enter in a command");
-            var iknowwhatwearegonnadotodayferb = Console.ReadLine()?.Replace("\"", "");
+            Console.WriteLine("If you want to use the classic console version, enter \"console\" or leave blank.\nIf you want to enter the menu, enter \"menu\". Otherwise enter in a command\n");
+            var iknowwhatwearegonnadotodayferb = Console.ReadLine();
             if (iknowwhatwearegonnadotodayferb == "menu")
             {
                 Console.WriteLine("Menu is not implemented yet, please use the console version");
@@ -382,7 +387,14 @@ namespace GM3P
             }
             else if (iknowwhatwearegonnadotodayferb != "console" && !string.IsNullOrWhiteSpace(iknowwhatwearegonnadotodayferb))
             {
-                var args = iknowwhatwearegonnadotodayferb.Split(' ');
+                var args = Regex.Split(iknowwhatwearegonnadotodayferb, "(?:^| )(\"(?:[^\"]+|\"\")*\"|[^ ]*)");
+                args = args.Where(arg => !string.IsNullOrWhiteSpace(arg)).ToArray();
+                Console.WriteLine("args: \n");
+                for (int i = 0; i < args.Length; i++)
+                {
+                    Console.WriteLine(args[i]);
+                }
+                Console.WriteLine("");
                 await RunCommand(args);
                 if (args != null && args.Length > 0 && args[0].ToLower() != "exit")
                 {

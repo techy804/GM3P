@@ -665,7 +665,7 @@ namespace GM3P.Merging
                 config, chapter.ToString(), "1", "Objects");
 
             // Script presence probing (robust across forks)
-            string scriptsRoot = Path.Combine(config.WorkingDirectory, "UTMTCLI", "Scripts");
+            string scriptsRoot = Path.Combine(config.WorkingDirectory, "tools", "UTMTCLI", "Scripts");
             bool hasImportGraphics = File.Exists(Path.Combine(scriptsRoot, "ImportGraphics.csx"));
             bool hasImportNewObjects = File.Exists(Path.Combine(scriptsRoot, "ImportNewObjects.csx"));
             bool hasImportRooms = File.Exists(Path.Combine(scriptsRoot, "ImportRoomsBulk.csx"));

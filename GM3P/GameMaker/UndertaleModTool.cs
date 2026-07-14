@@ -79,32 +79,32 @@ namespace GM3P.GameMaker
                 if (isVanilla)
                 {
                     scriptsToRun =
-                        " --scripts \"" + config.WorkingDirectory + "/UTMTCLI/Scripts/ExportAllTexturesGrouped.csx\"" +
-                        " --scripts \"" + config.WorkingDirectory + "/UTMTCLI/Scripts/ExportAllCode.csx\"" +
-                        " --scripts \"" + config.WorkingDirectory + "/UTMTCLI/Scripts/ExportAllRoomsWithCC.csx\"" +
-                        " --scripts \"" + config.WorkingDirectory + "/UTMTCLI/Scripts/ExportAssetOrder.csx\"";
+                        " --scripts \"" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/ExportAllTexturesGrouped.csx\"" +
+                        " --scripts \"" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/ExportAllCode.csx\"" +
+                        " --scripts \"" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/ExportAllRoomsWithCC.csx\"" +
+                        " --scripts \"" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/ExportAssetOrder.csx\"";
 
                     // Sprite-sample cache refresh (global cache under output/Cache/vanilla/<sha1>)
                     if (NeedsSpriteSampleRefresh(slotRoot))
-                        scriptsToRun += " --scripts \"" + config.WorkingDirectory + "/UTMTCLI/Scripts/ExportSpriteSamples.csx\"";
+                        scriptsToRun += " --scripts \"" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/ExportSpriteSamples.csx\"";
                 }
                 else
                 {
                     // Prefer fast path if present
-                    var modifiedOnly = Path.Combine(config.WorkingDirectory, "UTMTCLI", "Scripts", "ExportModifiedOnly.csx");
+                    var modifiedOnly = Path.Combine(config.WorkingDirectory, "tools", "UTMTCLI", "Scripts", "ExportModifiedOnly.csx");
                     if (File.Exists(modifiedOnly) && config.EnableFastCombiner)
                     {
                         scriptsToRun =
-                            " --scripts \"" + config.WorkingDirectory + "/UTMTCLI/Scripts/ExportModifiedOnly.csx\"";
+                            " --scripts \"" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/ExportModifiedOnly.csx\"";
                     }
                     else
                     {
                         scriptsToRun =
-                            " --scripts \"" + config.WorkingDirectory + "/UTMTCLI/Scripts/ExportAllTexturesGrouped.csx\"" +
-                            " --scripts \"" + config.WorkingDirectory + "/UTMTCLI/Scripts/ExportAllCode.csx\"" +
-                            " --scripts \"" + config.WorkingDirectory + "/UTMTCLI/Scripts/ExportAllRoomsWithCC.csx\"" +
-                            " --scripts \"" + config.WorkingDirectory + "/UTMTCLI/Scripts/ExportAssetOrder.csx\"" +
-                            " --scripts \"" + config.WorkingDirectory + "/UTMTCLI/Scripts/ExportNewObjects.csx\"";
+                            " --scripts \"" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/ExportAllTexturesGrouped.csx\"" +
+                            " --scripts \"" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/ExportAllCode.csx\"" +
+                            " --scripts \"" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/ExportAllRoomsWithCC.csx\"" +
+                            " --scripts \"" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/ExportAssetOrder.csx\"" +
+                            " --scripts \"" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/ExportNewObjects.csx\"";
                     }
                 }
 
@@ -190,7 +190,7 @@ namespace GM3P.GameMaker
                     {
                         var args = "load \"" + dataWin + "\" --verbose --output \"" + dataWin + "\"";
                         foreach (var script in scriptNames)
-                            args += " --scripts \"" + config.WorkingDirectory + "/UTMTCLI/Scripts/" + script + "\"";
+                            args += " --scripts \"" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/" + script + "\"";
 
                         proc.StartInfo.FileName = config.ModToolPath;
                         proc.StartInfo.Arguments = args;
@@ -199,7 +199,7 @@ namespace GM3P.GameMaker
                     {
                         var args = config.ModToolPath + " load '" + dataWin + "' --verbose --output '" + dataWin + "'";
                         foreach (var script in scriptNames)
-                            args += " --scripts '" + config.WorkingDirectory + "/UTMTCLI/Scripts/" + script + "'";
+                            args += " --scripts '" + config.WorkingDirectory + "/tools/UTMTCLI/Scripts/" + script + "'";
 
                         proc.StartInfo.FileName = "/bin/bash";
                         proc.StartInfo.Arguments = "-c \"" + args + "\"";

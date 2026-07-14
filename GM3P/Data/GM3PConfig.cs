@@ -12,7 +12,7 @@
         public int ModAmount { get; set; }
         public int ChapterAmount { get; set; } = 1;
         public bool Combined { get; set; }
-        public bool EnableFastCombiner { get; set; } = true;
+        public bool EnableFastCombiner { get; set; } = false;
         public int CombinerTool { get; set; } = 0;
 
         // Cache settings

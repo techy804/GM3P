@@ -8,7 +8,7 @@ namespace GM3P.Patching
     {
         Task ApplyPatches(string[] patchPaths, GM3PConfig config);
         Task ApplyPatch(string sourceFile, string patchFile, string targetFile, GM3PConfig config);
-        Task CreatePatch(string originalFile, string modifiedFile, string patchFile, string g3mpatch, GM3PConfig config);
+        Task CreatePatch(string originalFile, string modifiedFile, string patchFile, GM3PConfig config);
     }
 
     public class PatchService : IPatchService
@@ -35,13 +35,12 @@ namespace GM3P.Patching
                     continue;
 
                 string[] parts = chapterMods.Split(',');
-                var actualPatches = parts.Skip(2).Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
-
+                var actualPatches = parts.Skip(0).Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
+                Console.WriteLine(actualPatches);
                 for (int i = 0; i < actualPatches.Length && i < config.ModAmount; i++)
                 {
                     int modNumber = i + 2;
                     string patchFile = actualPatches[i].Trim();
-
                     if (!File.Exists(patchFile))
                     {
                         Console.WriteLine($"WARNING: Patch file not found: {patchFile}");
@@ -76,6 +75,7 @@ namespace GM3P.Patching
 
                     case ".win":
                         File.Copy(patchFile, dataPath, overwrite: true);
+                        Console.WriteLine($"Copied: {patchFile} to {dataPath}");
                         break;
 
                     case ".xdelta":
@@ -144,13 +144,13 @@ namespace GM3P.Patching
                 {
                     process.StartInfo.FileName = config.G3MToolPath;
                     process.StartInfo.Arguments =
-                        $"patch apply \"{dataPath}\" \"{tmpPath}\" \"{patchPath}\" --xdelta-fallback";
+                        $"patch apply \"{dataPath}\" \"{patchPath}\" \"{tmpPath}\" --xdelta-fallback";
                 }
                 else if (OperatingSystem.IsLinux())
                 {
                     process.StartInfo.FileName = "/bin/bash";
                     process.StartInfo.Arguments =
-                        $"-c \"{config.G3MToolPath} patch apply '{dataPath}' '{tmpPath}' '{patchPath}' --xdelta-fallback\"";
+                        $"-c \"{config.G3MToolPath} patch apply '{dataPath}' '{patchPath}' '{tmpPath}' --xdelta-fallback\"";
                 }
                 process.StartInfo.CreateNoWindow = false;
                 process.StartInfo.UseShellExecute = false;
@@ -192,7 +192,7 @@ namespace GM3P.Patching
                         $"-c \"{config.DeltaPatcherPath} -v -d -f -s '{dataPath}' '{patchPath}' '{tmpPath}'\"";
                 }
 
-                process.StartInfo.CreateNoWindow = false;
+                process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.Start();
@@ -231,13 +231,13 @@ namespace GM3P.Patching
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.Start();
-
-                await process.StandardOutput.ReadToEndAsync();
+                string output = await process.StandardOutput.ReadToEndAsync();
+                Console.WriteLine(output);
                 await process.WaitForExitAsync();
             }
         }
 
-        public async Task CreatePatch(string originalFile, string modifiedFile, string patchFile, string g3mpatch, GM3PConfig config)
+        public async Task CreatePatch(string originalFile, string modifiedFile, string patchFile, GM3PConfig config)
         {
             // First xDelta3
             using (var process = new Process())
@@ -246,19 +246,21 @@ namespace GM3P.Patching
                 {
                     process.StartInfo.FileName = config.DeltaPatcherPath;
                     process.StartInfo.Arguments =
-                        $"-v -e -f -s \"{originalFile}\" \"{modifiedFile}\" \"{patchFile}\"";
+                        $"-v -e -f -s \"{originalFile}\" \"{modifiedFile}\" \"{patchFile}.xdelta\"";
                 }
                 else if (OperatingSystem.IsLinux())
                 {
                     process.StartInfo.FileName = "/bin/bash";
                     process.StartInfo.Arguments =
-                        $"-c \"{config.DeltaPatcherPath} -v -e -f -s '{originalFile}' '{modifiedFile}' '{patchFile}'\"";
+                        $"-c \"{config.DeltaPatcherPath} -v -e -f -s '{originalFile}' '{modifiedFile}' '{patchFile}.xdelta'\"";
                 }
 
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardOutput = true;
                 process.Start();
-
+                string output = await process.StandardOutput.ReadToEndAsync();
+                Console.WriteLine(output);
                 await process.WaitForExitAsync();
             }
             // Then G3MTool
@@ -268,13 +270,13 @@ namespace GM3P.Patching
                 {
                     process.StartInfo.FileName = config.G3MToolPath;
                     process.StartInfo.Arguments =
-                        $"patch create \"{originalFile}\" \"{modifiedFile}\" \"{g3mpatch}\" --xdelta-fallback";
+                        $"patch create \"{originalFile}\" \"{modifiedFile}\" \"{patchFile}.g3mpatch\" --xdelta-fallback";
                 }
                 else if (OperatingSystem.IsLinux())
                 {
                     process.StartInfo.FileName = "/bin/bash";
                     process.StartInfo.Arguments =
-                        $"-c \"{config.G3MToolPath} patch apply '{originalFile}' '{modifiedFile}' '{g3mpatch}' --xdelta-fallback\"";
+                        $"-c \"{config.G3MToolPath} patch apply '{originalFile}' '{modifiedFile}' '{patchFile}.g3mpatch' --xdelta-fallback\"";
                 }
                 process.StartInfo.CreateNoWindow = true;
                 process.StartInfo.UseShellExecute = false;
