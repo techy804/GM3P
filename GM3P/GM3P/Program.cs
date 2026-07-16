@@ -12,6 +12,7 @@ using GM3P.GameMaker;
 using GM3P.Logging;
 using GM3P.Merging;
 using GM3P.Patching;
+using GM3P.Manager;
 
 namespace GM3P
 {
@@ -70,10 +71,12 @@ namespace GM3P
                 directoryManager, fileLinker, hashCache, pngUtils,
                 assetHelper, assetOrderMerger, gitService, modTool);
             var patchService = new PatchService(directoryManager);
+            var modManager = new ModManager();
+            var install = new Install(directoryManager);
 
             _orchestrator = new GM3POrchestrator(
                 config, directoryManager, fileLinker, hashCache,
-                exportCache, patchService, modCombiner, modTool);
+                exportCache, patchService, modCombiner, modTool, modManager, install);
 
             _config = config;
         }
@@ -170,6 +173,14 @@ namespace GM3P
 
                 case "clear":
                     HandleClear(args);
+                    break;
+
+                case "play":
+                    HandlePlay(reqArgs, opArgs);
+                    break;
+
+                case "import":
+                    HandleInstall(reqArgs, opArgs);
                     break;
 
                 case "help":
@@ -373,7 +384,20 @@ namespace GM3P
             string target = args.Length > 1 ? args[1] : "runningCache";
             _orchestrator!.Clear(target);
         }
-
+        static async Task HandlePlay(string[] regArgs, string[] opArg)
+        {
+            string game = regArgs.Length > 1 ? regArgs[1] : null;
+            string version = regArgs.Length > 2 ? regArgs[2] : null;
+            _orchestrator!.ExecutePlay(game, version);
+        }
+        static async Task HandleInstall(string[] regArgs, string[] opArgs)
+        { 
+            string modName = regArgs.Length > 1 ? regArgs[1].ToLower() : "vanilla";
+            string gamePath = regArgs.Length > 2 ? regArgs[2] : null;
+            string game = regArgs.Length > 3 ? regArgs[3] : null;
+            string version = regArgs.Length > 4 ? regArgs[4] : null;
+            await _orchestrator!.ExecuteInstall(modName, gamePath, game, version);
+        }
         static async Task RunAppVersion()
         {
             Console.WriteLine("Read the README for Operating Instructions\n");

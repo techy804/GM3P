@@ -11,6 +11,7 @@ namespace GM3P.FileSystem
         void CreateCombinerDirectories(GM3PConfig config);
         void CreateResultDirectories(GM3PConfig config, string modName);
         void ClearDirectory(string path, bool recursive = true);
+        void CopyDirectory(string sourceDir, string destinationDir, bool recursive);
         string GetCachePath(GM3PConfig config, params string[] segments);
         string GetXDeltaCombinerPath(GM3PConfig config, params string[] segments);
         List<string> FindDataWinFiles(string path);
@@ -125,6 +126,39 @@ namespace GM3P.FileSystem
             }
 
             return winFiles;
+        }
+        // This method copies a directory. C+P from Microsoft Docs: https://learn.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories
+        public void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
+        {
+            // Get information about the source directory
+            var dir = new DirectoryInfo(sourceDir);
+
+            // Check if the source directory exists
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
+
+            // Cache directories before we start copying
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            // Create the destination directory
+            Directory.CreateDirectory(destinationDir);
+
+            // Get the files in the source directory and copy to the destination directory
+            foreach (FileInfo file in dir.GetFiles())
+            {
+                string targetFilePath = Path.Combine(destinationDir, file.Name);
+                file.CopyTo(targetFilePath);
+            }
+
+            // If recursive and copying subdirectories, recursively call this method
+            if (recursive)
+            {
+                foreach (DirectoryInfo subDir in dirs)
+                {
+                    string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
+                    CopyDirectory(subDir.FullName, newDestinationDir, true);
+                }
+            }
         }
     }
 }

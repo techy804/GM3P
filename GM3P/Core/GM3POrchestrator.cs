@@ -2,6 +2,7 @@
 using GM3P.Data;
 using GM3P.FileSystem;
 using GM3P.GameMaker;
+using GM3P.Manager;
 using GM3P.Merging;
 using GM3P.Patching;
 
@@ -15,6 +16,8 @@ namespace GM3P.Core
         Task<bool> ExecuteResult(string modName);
         Task<bool> ExecuteDump();
         Task<bool> ExecuteImport();
+        Task<bool> ExecutePlay(string game, string version);
+        Task<bool> ExecuteInstall(string modName, string gamePath, string game, string version);
         void Clear(string target = "runningCache");
     }
 
@@ -29,6 +32,8 @@ namespace GM3P.Core
         private readonly IPatchService _patchService;
         private readonly IModCombiner _modCombiner;
         private readonly IUndertaleModTool _modTool;
+        private readonly IModManager _modManager;
+        private readonly IInstall _install;
         private readonly SemaphoreSlim _dumpSemaphore;
         private readonly object _dumpLock = new object();
         #endregion
@@ -42,7 +47,9 @@ namespace GM3P.Core
             IExportCache exportCache,
             IPatchService patchService,
             IModCombiner modCombiner,
-            IUndertaleModTool modTool)
+            IUndertaleModTool modTool,
+            IModManager modManager,
+            IInstall install)
         {
             _config = config;
             _directoryManager = directoryManager;
@@ -52,11 +59,15 @@ namespace GM3P.Core
             _patchService = patchService;
             _modCombiner = modCombiner;
             _modTool = modTool;
+            _modManager = modManager;
+            _install = install;
 
             // IMPORTANT: Set to 1 to prevent file conflicts
             // Multiple UTMT instances can't write to the same output directories
             _dumpSemaphore = new SemaphoreSlim(1);
         }
+
+
         #endregion
 
         #region Public Interface Methods
@@ -209,6 +220,42 @@ namespace GM3P.Core
             catch (Exception ex)
             {
                 Console.WriteLine($"Result creation failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> ExecutePlay(string game, string version)
+        {
+
+            try
+            {
+                Console.WriteLine($"Starting Playing");
+                await _modManager.PlayGame(
+                    _config.Config.OutputPath + "\\DeltamodLite\\instances\\vanilla\\" + game + "\\" + version + "\\" + game + "\\" + game + ".exe",
+                    null,
+                    _config.Config);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Execution failed: {ex.Message}");
+                return false;
+            }
+
+        }
+
+        public async Task<bool> ExecuteInstall(string modName, string gamePath, string game, string version)
+        {
+            try
+            {
+                Console.WriteLine($"Starting Install");
+                await _install.InstallInstance(modName, gamePath, game, version, _config.Config);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Execution failed: {ex.Message}");
                 return false;
             }
         }
