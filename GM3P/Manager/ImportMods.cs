@@ -30,8 +30,8 @@ namespace GM3P.Manager
             {
                 _directoryManager.CopyDirectory(gamePath, Path.Combine(config.OutputPath,"DeltamodLite","instances",modName,game,version,game) , true);
             }
-            catch
-            {
+            catch (Exception ex) {
+                Console.WriteLine($"Error copying vanilla files for mod {modName}: {ex.Message}");
 
             }
         }

@@ -5,6 +5,7 @@ using GM3P.GameMaker;
 using GM3P.Manager;
 using GM3P.Merging;
 using GM3P.Patching;
+using System.Runtime.InteropServices;
 
 namespace GM3P.Core
 {
@@ -16,7 +17,7 @@ namespace GM3P.Core
         Task<bool> ExecuteResult(string modName);
         Task<bool> ExecuteDump();
         Task<bool> ExecuteImport();
-        Task<bool> ExecutePlay(string game, string version);
+        Task<bool> ExecutePlay(string game, string version, string modName, string? inputList);
         Task<bool> ExecuteInstall(string modName, string gamePath, string game, string version);
         void Clear(string target = "runningCache");
     }
@@ -224,17 +225,70 @@ namespace GM3P.Core
             }
         }
 
-        public async Task<bool> ExecutePlay(string game, string version)
+        public async Task<bool> ExecutePlay(string game, string version, string? modName, string? inputList)
         {
 
             try
             {
-                Console.WriteLine($"Starting Playing");
-                await _modManager.PlayGame(
-                    _config.Config.OutputPath + "\\DeltamodLite\\instances\\vanilla\\" + game + "\\" + version + "\\" + game + "\\" + game + ".exe",
-                    null,
-                    _config.Config);
-
+                if (string.IsNullOrEmpty(version)) { version = "1.0.0"; }
+                if (string.IsNullOrEmpty(modName) || Directory.Exists(Path.Combine(_config.Config.OutputPath, "DeltamodLite", "instances", modName)))
+                {
+                    if(OperatingSystem.IsWindows())
+                    {
+                        Console.WriteLine($"Starting Playing");
+                        await _modManager.PlayGame(
+                            _config.Config.OutputPath + "\\DeltamodLite\\instances\\" + "vanilla" + "\\" + game + "\\" + version + "\\" + game + "\\" + game + ".exe",
+                            inputList,
+                            _config.Config);
+                    }
+                    else if (OperatingSystem.IsLinux())
+                    {
+                        Console.WriteLine($"Starting Playing");
+                        await _modManager.PlayGame(
+                            _config.Config.OutputPath + "/DeltamodLite/instances/" + "vanilla" + "/" + game + "/" + version + "/" + game + "/" + game + ".exe",
+                            inputList,
+                            _config.Config);
+                    }
+                }
+                else
+                {
+                    string[] mods = modName.Split(",");
+                    if (mods.Length == 1 && !Directory.Exists(Path.Combine(_config.Config.OutputPath, "DeltamodLite", "instances", modName, game, version))) {
+                        int vanillaFiles = _directoryManager.FindDataWinFiles(Path.Combine(_config.Config.OutputPath, "DeltamodLite", "instances", "vanilla", game, version, game)).Count;
+                        await _directoryManager.CopyDirectory(Path.Combine(_config.Config.OutputPath, "DeltamodLite", "instances", "vanilla", game, version, game), Path.Combine(_config.Config.OutputPath, "DeltamodLite", "instances", "tmpMod", game, version), true);
+                        _config.UpdateConfiguration(c => c.ChapterAmount = vanillaFiles);
+                        for (int i = 0; i < _config.Config.ChapterAmount; i++)
+                        {
+                            Console.WriteLine(i.ToString());
+                            if (Directory.Exists(Path.Combine(_config.Config.OutputPath, "result", modName, i.ToString())))
+                            {
+                                Console.WriteLine(i.ToString());
+                                await _patchService.ApplyPatch(_directoryManager.FindDataWinFiles(Path.Combine(_config.Config.OutputPath, "DeltamodLite", "instances", "vanilla", game, version, game))[i], Directory.GetFiles(Path.Combine(_config.Config.OutputPath, "result", modName, i.ToString()), "*.xdelta")[0], _directoryManager.FindDataWinFiles(Path.Combine(_config.Config.OutputPath, "DeltamodLite", "instances", "tmpMod", game, version))[i], _config.Config);
+                            }
+                        }
+                        modName = "tmpMod";
+                    }
+                    if (OperatingSystem.IsWindows())
+                    {
+                        Console.WriteLine($"Starting Playing");
+                        await _modManager.PlayGame(
+                            _config.Config.OutputPath + "\\DeltamodLite\\instances\\" + modName + "\\" + game + "\\" + version + "\\" + game + ".exe",
+                            inputList,
+                            _config.Config);
+                    }
+                    else if (OperatingSystem.IsLinux())
+                    {
+                        Console.WriteLine($"Starting Playing");
+                        await _modManager.PlayGame(
+                            _config.Config.OutputPath + "/DeltamodLite/instances/" + modName + "/" + game + "/" + version + "/" + game + ".exe",
+                            inputList,
+                            _config.Config);
+                    }
+                }
+                if (modName == "tmpMod")
+                {
+                    Directory.Delete(Path.Combine(_config.Config.OutputPath, "DeltamodLite", "instances", "tmpMod"), true);
+                }
                 return true;
             }
             catch (Exception ex)
@@ -250,7 +304,16 @@ namespace GM3P.Core
             try
             {
                 Console.WriteLine($"Starting Install");
-                await _install.InstallInstance(modName, gamePath, game, version, _config.Config);
+                if (FileAttributes.Directory == (File.GetAttributes(gamePath) & FileAttributes.Directory))
+                {
+                    Console.WriteLine($"  Detected directory, importing instance from folder: {gamePath}");
+                    await _install.InstallInstance(modName, gamePath, game, version, _config.Config);
+                }
+                else
+                {
+
+                    Console.WriteLine($"  Detected file, installing instance from patch file: {gamePath}");
+                }
                 return true;
             }
             catch (Exception ex)
@@ -281,10 +344,13 @@ namespace GM3P.Core
                 case "output":
                     _directoryManager.ClearDirectory(outputPath);
                     break;
-
+                case "tempMod":
+                    break;
                 case "modpacks":
                     _directoryManager.ClearDirectory(Path.Combine(outputPath, "result"));
                     break;
+
+
 
                 default:
                     Console.WriteLine($"Unknown clear target: {target}");

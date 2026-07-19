@@ -227,7 +227,7 @@ namespace GM3P.Patching
                         $"-c \"{config.DeltaPatcherPath} -v -d -f -s '{sourceFile}' '{patchFile}' '{targetFile}'\"";
                 }
 
-                process.StartInfo.CreateNoWindow = true;
+                process.StartInfo.CreateNoWindow = false;
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.Start();

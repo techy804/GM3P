@@ -11,7 +11,7 @@ namespace GM3P.FileSystem
         void CreateCombinerDirectories(GM3PConfig config);
         void CreateResultDirectories(GM3PConfig config, string modName);
         void ClearDirectory(string path, bool recursive = true);
-        void CopyDirectory(string sourceDir, string destinationDir, bool recursive);
+        Task<bool> CopyDirectory(string sourceDir, string destinationDir, bool recursive);
         string GetCachePath(GM3PConfig config, params string[] segments);
         string GetXDeltaCombinerPath(GM3PConfig config, params string[] segments);
         List<string> FindDataWinFiles(string path);
@@ -128,7 +128,7 @@ namespace GM3P.FileSystem
             return winFiles;
         }
         // This method copies a directory. C+P from Microsoft Docs: https://learn.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories
-        public void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
+        public async Task<bool> CopyDirectory(string sourceDir, string destinationDir, bool recursive)
         {
             // Get information about the source directory
             var dir = new DirectoryInfo(sourceDir);
@@ -159,6 +159,7 @@ namespace GM3P.FileSystem
                     CopyDirectory(subDir.FullName, newDestinationDir, true);
                 }
             }
+            return true;
         }
     }
 }

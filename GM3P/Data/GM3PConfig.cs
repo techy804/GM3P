@@ -14,11 +14,12 @@
         public bool Combined { get; set; }
         public bool EnableFastCombiner { get; set; } = false;
         public int CombinerTool { get; set; } = 0;
+        public bool verboseLogging { get; set; } = false;
 
         // Cache settings
-        public bool CacheEnabled { get; set; } = true;
-        public bool CacheSpritesEnabled { get; set; } = true;
-        public int ExportCacheCapMB { get; set; } = 2048;
+        public bool CacheEnabled { get; set; } = false;
+        public bool CacheSpritesEnabled { get; set; } = false;
+        public int ExportCacheCapMB { get; set; } = 1024;
         public int XDeltaConcurrency { get; set; } = 3;
 
         // Debug mode for Roslyn scripts.

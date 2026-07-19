@@ -101,7 +101,7 @@ namespace GM3P
         {
 
             var opArgParse = 0;
-            string[] singleOptions = { "-version", "-help", "v" };
+            string[] singleOptions = { "-help", "v" };
             int opArgCount = 0;
             int reqArgCount = 0;
             for (int i = 0; i < args.Length; i++)
@@ -112,14 +112,18 @@ namespace GM3P
                     opArgs[opArgCount] = args[i];
                     foreach (string singleOption in singleOptions)
                     {
-                        if (args[i].EndsWith(singleOption))
+                        if (!args[i].EndsWith(singleOption))
                         {
                             opArgParse++;
                         }
+                        else
+                        {
+                            opArgCount++;
+                        }
                     }
-                    opArgCount++;
+                    
                 }
-                if (!args[i].StartsWith("-"))
+                else if (!args[i].StartsWith("-"))
                 {
                     if (opArgParse == 0)
                     {
@@ -129,8 +133,9 @@ namespace GM3P
                     }
                     else
                     {
-                        opArgs[opArgCount] += " " + args[i];
+                        opArgs[opArgCount] = opArgs[opArgCount] + " " + args[i];
                         opArgParse--;
+                        opArgCount++;
                     }
                 }
             }
@@ -176,11 +181,11 @@ namespace GM3P
                     break;
 
                 case "play":
-                    HandlePlay(reqArgs, opArgs);
+                    await HandlePlay(reqArgs, opArgs);
                     break;
 
                 case "import":
-                    HandleInstall(reqArgs, opArgs);
+                    await HandleInstall(reqArgs, opArgs);
                     break;
 
                 case "help":
@@ -246,6 +251,12 @@ namespace GM3P
                             break;
                         case "c.enablefastcombiner":
                             _config?.UpdateConfiguration(c => c.EnableFastCombiner = bool.Parse(value));
+                            break;
+                        case "c.combinertool":
+                            _config?.UpdateConfiguration(c => c.CombinerTool = int.Parse(value));
+                            break;
+                        case "c.verboselogging":
+                            _config?.UpdateConfiguration(c => c.verboseLogging = bool.Parse(value));
                             break;
                         case "c.cacheenabled": 
                             _config?.UpdateConfiguration(c => c.CacheEnabled = bool.Parse(value));
@@ -386,16 +397,41 @@ namespace GM3P
         }
         static async Task HandlePlay(string[] regArgs, string[] opArg)
         {
-            string game = regArgs.Length > 1 ? regArgs[1] : null;
-            string version = regArgs.Length > 2 ? regArgs[2] : null;
-            _orchestrator!.ExecutePlay(game, version);
+            string? game = regArgs.Length > 1 ? regArgs[1] : null;
+            string? version = regArgs.Length > 2 ? regArgs[2] : null;
+            string? modName = null;
+            string? inputList = null;
+            for (int i = 0; i < opArg.Length; i++)
+            {
+                if(opArg[i].StartsWith("--mods "))
+                {
+                   modName = opArg[i].Replace("--mods ","");
+                }
+                if (opArg[i].StartsWith("--inputList "))
+                {
+                    inputList = opArg[i].Replace("--inputList ", "");
+                    inputList = inputList.Replace("\"", "");
+                }
+            }
+            await _orchestrator!.ExecutePlay(game, version, modName, inputList);
         }
-        static async Task HandleInstall(string[] regArgs, string[] opArgs)
+        static async Task HandleInstall(string[] regArgs, string[] opArg)
         { 
-            string modName = regArgs.Length > 1 ? regArgs[1].ToLower() : "vanilla";
-            string gamePath = regArgs.Length > 2 ? regArgs[2] : null;
-            string game = regArgs.Length > 3 ? regArgs[3] : null;
-            string version = regArgs.Length > 4 ? regArgs[4] : null;
+            string modName = "vanilla";
+            string? gamePath = regArgs.Length > 1 ? regArgs[1] : null;
+            string? game = regArgs.Length > 2 ? regArgs[2] : null;
+            string? version = "1.0.0";
+            for (int i = 0; i < opArg.Length; i++)
+            {
+                if (opArg[i].StartsWith("--modName "))
+                {
+                    modName = opArg[i].Replace("--modName ", "");
+                }
+                if (opArg[i].StartsWith("--version "))
+                {
+                    version = opArg[i].Replace("--version ", "");
+                }
+            }
             await _orchestrator!.ExecuteInstall(modName, gamePath, game, version);
         }
         static async Task RunAppVersion()
@@ -577,16 +613,18 @@ namespace GM3P
                     Console.WriteLine("\nSettings:");
                     Console.WriteLine("  c.vanillapath          - Path to vanilla game or data.win");
                     Console.WriteLine("  c.outputpath           - Base output directory. Default: ./output");
-                    Console.WriteLine("  c.deltapatcherpath     - Path to xDelta executable. Default: ./xdelta3-3.1.0-x86_64.exe");
-                    Console.WriteLine("  c.modtoolpath          - Path to mod tool executable (e.g. UTMT). Default: ./UTMTCLI/UndertaleModCli.exe");
+                    Console.WriteLine("  c.deltapatcherpath     - Path to xDelta executable. Default: ./tools/xdelta3.exe");
+                    Console.WriteLine("  c.modtoolpath          - Path to mod tool executable (e.g. UTMT). Default: ./tools/UTMTCLI/UndertaleModCli.exe");
                     Console.WriteLine("  c.gameengine           - Game engine type (e.g. GM for GameMaker). Currently unused");
                     Console.WriteLine("  c.modamount            - Number of mods to patch/compare");
                     Console.WriteLine("  c.chapteramount        - Number of chapters to patch. Default: 1)");
                     Console.WriteLine("  c.combined            - Whether mods were combined (true/false). Default: false");
-                    Console.WriteLine("  c.enablefastcombiner   - Whether to enable fast combiner (true/false), must be false for room combining. Default: true");
-                    Console.WriteLine("  c.cacheenabled         - Whether to enable export cache (true/false). Default: true");
-                    Console.WriteLine("  c.cachespritesenabled - Whether to cache sprites in export cache (true/false). Default: true");
-                    Console.WriteLine("  c.exportcachecapmb    - Export cache size cap in MB. Default: 2048");
+                    Console.WriteLine("  c.enablefastcombiner   - Whether to enable fast combiner (true/false), must be false for room combining. Default: false");
+                    Console.WriteLine("  c.combinertool         - Tool to use for combining mods. Default: GM3P 0");
+                    Console.WriteLine("  c.verboselogging       - Whether verbose logging is enabled (true/false). Default: false");
+                    Console.WriteLine("  c.cacheenabled         - Whether to enable export cache (true/false). Default: false");
+                    Console.WriteLine("  c.cachespritesenabled - Whether to cache sprites in export cache (true/false). Default: false");
+                    Console.WriteLine("  c.exportcachecapmb    - Export cache size cap in MB. Default: 1024");
                     Console.WriteLine("  c.xdeltaconcurrency   - Number of concurrent xDelta processes. Default: 3");
                     break;
                 case "masspatch":
@@ -625,7 +663,28 @@ namespace GM3P
                     Console.WriteLine("  ModAmount  - Number of mods");
                     Console.WriteLine("  ConfigPath - Optional config JSON");
                     break;
-
+                case "import":
+                    Console.WriteLine("\nImport Command:");
+                    Console.WriteLine("  Imports mods and instances into the mod manager");
+                    Console.WriteLine("\nUsage:");
+                    Console.WriteLine("  GM3P.exe import [GamePath] [Game] --modName [ModName] --version [Version?]");
+                    Console.WriteLine("\nArguments:");
+                    Console.WriteLine("  GamePath  - Path to the game directory");
+                    Console.WriteLine("  Game      - Game identifier");
+                    Console.WriteLine("  ModName   - Name of the mod to import (default: vanilla)");
+                    Console.WriteLine("  Version   - Game version (optional, but recommended)");
+                    break;
+                case "play":
+                    Console.WriteLine("\nPlay Command:");
+                    Console.WriteLine("  Launches the game with the specified modpack");
+                    Console.WriteLine("\nUsage:");
+                    Console.WriteLine("  GM3P.exe play [Game] [Version] --mods [ModName] --inputList [InputListPath]");
+                    Console.WriteLine("\nArguments:");
+                    Console.WriteLine("  Game       - Game identifier");
+                    Console.WriteLine("  Version    - Game version");
+                    Console.WriteLine("  ModName    - Name of the modpack to play (optional)");
+                    Console.WriteLine("  inputList  - Path to input list file (optional)");
+                    break;
                 case "clear":
                     Console.WriteLine("\nClear Command:");
                     Console.WriteLine("  Clears temporary files and directories");

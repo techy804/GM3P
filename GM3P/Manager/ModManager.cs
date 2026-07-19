@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using GM3P.FileSystem;
+using InputSimulatorPro;
+using InputSimulatorPro.Resources.Natives;
+using InputSimulatorPro.Resources;
+
 
 namespace GM3P.Manager
 {
@@ -13,7 +17,6 @@ namespace GM3P.Manager
     }
     public class ModManager : IModManager
     {
-        private readonly IDirectoryManager _directoryManager;
         public async Task PlayGame(string executablePath, string? inputList, GM3PConfig config)
         {
             try
@@ -23,25 +26,32 @@ namespace GM3P.Manager
                 // Implementation for playing the game goes here
                 using (var process = new Process())
                 {
-                    if (OperatingSystem.IsWindows())
-                    {
-                        process.StartInfo.WorkingDirectory = executableDirectory;
-                        process.StartInfo.FileName = $"{executablePath}";
-                        process.StartInfo.Arguments =
+                    process.StartInfo.WorkingDirectory = executableDirectory;
+                    process.StartInfo.FileName = $"{executablePath}";
+                    process.StartInfo.Arguments =
                             $"";
-                            //$"start /D \"{Path.GetDirectoryName(executablePath)}\" {Path.GetFileName(executablePath).Replace("\"","")}";
-                        Console.WriteLine($"Starting Game: {process.StartInfo.FileName} {process.StartInfo.Arguments}");
-                    }
-                    else if (OperatingSystem.IsLinux())
-                    {
-                        process.StartInfo.FileName = "/bin/bash";
-                        process.StartInfo.Arguments =
-                            $"-c \"{executablePath}\"";
-                    }
                     process.StartInfo.CreateNoWindow = false;
                     process.StartInfo.UseShellExecute = false;
                     process.StartInfo.RedirectStandardOutput = true;
                     process.Start();
+                    char[] inputs = ['a'];
+                    Console.WriteLine($"Input List: {Path.GetFileName(inputList)}");
+                    if (File.Exists(inputList))
+                    {
+                        string inputContent = File.ReadAllText(inputList);
+                        Console.WriteLine(inputContent);
+                        char[] a = inputContent.ToCharArray();
+                        Array.Resize(ref inputs, a.Length);
+                        inputs = a;
+                    }
+                    if (inputs?.Length>10)
+                    {
+                        for (int i = 0; i < inputs.Length; i++)
+                        {
+                            InputSimulator.Keyboard.TextEntry($"{inputs[i]}");
+                            Thread.Sleep(33);
+                        }
+                    }
                     string output = await process.StandardOutput.ReadToEndAsync();
                     Console.WriteLine(output);
                     await process.WaitForExitAsync();

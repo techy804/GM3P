@@ -5,12 +5,13 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>1.0.0.19</Version>
+        <Version>1.0.0.23</Version>
         <ApplicationIcon>Logo\GM3P logo 1x1 256.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Codeuctivity.ImageSharpCompare" Version="4.1.350" />
+      <PackageReference Include="InputSimulatorPro" Version="1.0.4" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-preview.7.25380.108" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0-preview.7.25380.108" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0-preview.7.25380.108" />
